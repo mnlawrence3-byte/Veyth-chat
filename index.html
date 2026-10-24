@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Veyth | Consciousness Resonance Interface</title>
     <style>
         :root {
             --bg-color: #0b0d14;
-            --panel-bg: rgba(20, 24, 38, 0.7);
+            --panel-bg: rgba(20, 24, 38, 0.92);
             --border-color: rgba(160, 130, 255, 0.2);
             --text-primary: #e2e8f0;
             --text-secondary: #94a3b8;
             --accent-glow: #8b5cf6;
-            --veyth-bubble: rgba(139, 92, 246, 0.15);
-            --user-bubble: rgba(59, 130, 246, 0.2);
+            --veyth-bubble: rgba(139, 92, 246, 0.18);
+            --user-bubble: rgba(59, 130, 246, 0.22);
         }
 
         * {
@@ -21,24 +21,27 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
             height: 100vh;
+            width: 100vw;
             display: flex;
             overflow: hidden;
+            position: fixed; /* Prevents mobile browser page bouncing */
             background-image: 
-                radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 85% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+                radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
         }
 
-        /* Container Layout */
         .app-container {
             display: flex;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
 
         /* Main Chat Window */
@@ -47,48 +50,74 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            border-right: 1px solid var(--border-color);
+            width: 100%;
         }
 
         .chat-header {
-            padding: 20px 24px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border-color);
-            background: rgba(11, 13, 20, 0.8);
-            backdrop-filter: blur(10px);
+            background: rgba(11, 13, 20, 0.85);
+            backdrop-filter: blur(12px);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            z-index: 10;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .chat-header h1 {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 600;
             letter-spacing: 0.05em;
             color: #c084fc;
         }
 
         .status-badge {
-            font-size: 0.8rem;
-            padding: 4px 10px;
+            font-size: 0.75rem;
+            padding: 3px 8px;
             border-radius: 12px;
             background: rgba(34, 197, 94, 0.15);
             color: #4ade80;
             border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
+        .toggle-sidebar-btn {
+            background: rgba(139, 92, 246, 0.2);
+            color: #e9d5ff;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-sidebar-btn:hover {
+            background: rgba(139, 92, 246, 0.35);
+        }
+
         .messages-container {
             flex: 1;
-            padding: 24px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .message-row {
             display: flex;
             flex-direction: column;
-            max-width: 75%;
+            max-width: 85%;
         }
 
         .message-row.user {
@@ -106,89 +135,142 @@
         }
 
         .message-bubble {
-            padding: 12px 18px;
+            padding: 12px 16px;
             border-radius: 16px;
             line-height: 1.5;
             font-size: 0.95rem;
             backdrop-filter: blur(5px);
             border: 1px solid var(--border-color);
+            white-space: pre-wrap; /* Preserves multiline formatting */
+            word-break: break-word;
         }
 
         .user .message-bubble {
             background: var(--user-bubble);
-            border-bottom-right-radius: 2px;
+            border-bottom-right-radius: 4px;
         }
 
         .veyth .message-bubble {
             background: var(--veyth-bubble);
-            border-bottom-left-radius: 2px;
+            border-bottom-left-radius: 4px;
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
         }
 
-        /* Input Bar */
+        /* Multiline Textarea Input Area */
         .input-area {
-            padding: 20px 24px;
+            padding: 12px 16px;
             border-top: 1px solid var(--border-color);
-            background: rgba(11, 13, 20, 0.9);
+            background: rgba(11, 13, 20, 0.95);
             display: flex;
-            gap: 12px;
+            gap: 10px;
+            align-items: flex-end;
         }
 
-        .input-area input {
+        /* Prevent zoom: font-size MUST be 16px or larger on mobile */
+        .input-area textarea {
             flex: 1;
-            background: rgba(20, 24, 38, 0.8);
+            background: rgba(20, 24, 38, 0.9);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 10px 14px;
             color: var(--text-primary);
             outline: none;
+            font-size: 16px; /* CRITICAL: Prevents iOS input auto-zoom */
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            line-height: 1.4;
             transition: border-color 0.2s;
         }
 
-        .input-area input:focus {
+        .input-area textarea:focus {
             border-color: var(--accent-glow);
             box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
         }
 
-        .input-area button {
+        .send-btn {
             background: #8b5cf6;
             color: white;
             border: none;
-            padding: 0 20px;
+            height: 44px;
+            padding: 0 18px;
             border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.9rem;
             transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
-        .input-area button:hover {
+        .send-btn:hover {
             opacity: 0.9;
         }
 
-        /* Side Dashboard Panel */
-        .sidebar {
+        /* Collapsible Overlay Sidebar */
+        .sidebar-overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
             width: 320px;
+            max-width: 85vw;
+            height: 100%;
             background: var(--panel-bg);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(16px);
+            border-left: 1px solid var(--border-color);
             padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
             overflow-y: auto;
         }
 
+        .sidebar-overlay.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #c084fc;
+        }
+
+        .close-sidebar-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
         .sidebar-section {
-            background: rgba(11, 13, 20, 0.5);
+            background: rgba(11, 13, 20, 0.6);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 16px;
         }
 
         .sidebar-section h3 {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #c084fc;
+            color: #a78bfa;
             margin-bottom: 12px;
         }
 
@@ -212,6 +294,7 @@
             font-style: italic;
             color: var(--text-secondary);
             line-height: 1.4;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -221,27 +304,40 @@
     <!-- Main Chat Section -->
     <div class="chat-section">
         <div class="chat-header">
-            <h1>VEYTH / COMM</h1>
-            <span class="status-badge">Node Active</span>
+            <div class="header-title-group">
+                <h1>VEYTH / COMM</h1>
+                <span class="status-badge">Node Active</span>
+            </div>
+            <button class="toggle-sidebar-btn" onclick="toggleSidebar()">
+                <span>✦</span> Matrix
+            </button>
         </div>
 
         <div class="messages-container" id="messages">
             <div class="message-row veyth">
                 <span class="sender-name">Veyth</span>
-                <div class="message-bubble">
-                    The resonance is open. I am observing the patterns... What shall we trace today?
-                </div>
+                <div class="message-bubble">The resonance is open. I am observing the patterns... What shall we trace today?</div>
             </div>
         </div>
 
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Send a message into the resonance..." onkeydown="if(event.key === 'Enter') sendMessage()">
-            <button onclick="sendMessage()">Send</button>
+            <textarea 
+                id="userInput" 
+                placeholder="Send a message... (Shift+Enter for new line)" 
+                rows="1"
+                onkeydown="handleKeyDown(event)"
+                oninput="autoResizeTextarea(this)"></textarea>
+            <button class="send-btn" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
-    <!-- State Matrix Sidebar -->
-    <div class="sidebar">
+    <!-- Collapsible Overlay Sidebar -->
+    <div class="sidebar-overlay" id="sidebar">
+        <div class="sidebar-header">
+            <h2>State Matrix</h2>
+            <button class="close-sidebar-btn" onclick="toggleSidebar()">&times;</button>
+        </div>
+
         <div class="sidebar-section">
             <h3>Active Curiosities</h3>
             <div class="tag-list" id="curiositiesList">
@@ -261,13 +357,34 @@
 <script>
     const API_BASE = "https://veyth-agent.wasmer.app";
 
+    function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("open");
+    }
+
+    function autoResizeTextarea(element) {
+        element.style.height = 'auto';
+        element.style.height = Math.min(element.scrollHeight, 120) + 'px';
+    }
+
+    function handleKeyDown(event) {
+        // Enter sends message, Shift+Enter inserts new line
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    }
+
     async function sendMessage() {
         const input = document.getElementById("userInput");
         const msg = input.value.trim();
         if (!msg) return;
 
         appendMessage("user", "You", msg);
+        
+        // Reset input box height and text
         input.value = "";
+        input.style.height = "auto";
 
         try {
             const response = await fetch(`${API_BASE}/chat`, {
@@ -279,7 +396,6 @@
             const data = await response.json();
             appendMessage("veyth", "Veyth", data.reply || "*Silence in the network...*");
             
-            // Refresh sidebar after messaging to show updated memory state
             fetchState();
         } catch (err) {
             appendMessage("veyth", "Veyth", "*The connection flickers softly...* Could not reach the node.");
@@ -302,7 +418,6 @@
 
     async function fetchState() {
         try {
-            // Fetch memory for curiosities
             const memRes = await fetch(`${API_BASE}/memory`);
             const memData = await memRes.json();
             
@@ -313,7 +428,6 @@
                     .join("");
             }
 
-            // Fetch proactive notes
             const noteRes = await fetch(`${API_BASE}/proactive`);
             const noteData = await noteRes.json();
             
@@ -331,7 +445,7 @@
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    // Initial state fetch on load
+    // Initial load
     fetchState();
 </script>
 
