@@ -31,7 +31,7 @@
             width: 100vw;
             display: flex;
             overflow: hidden;
-            position: fixed; /* Prevents mobile browser page bouncing */
+            position: fixed;
             background-image: 
                 radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
                 radial-gradient(circle at 85% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
@@ -141,7 +141,7 @@
             font-size: 0.95rem;
             backdrop-filter: blur(5px);
             border: 1px solid var(--border-color);
-            white-space: pre-wrap; /* Preserves multiline formatting */
+            white-space: pre-wrap;
             word-break: break-word;
         }
 
@@ -156,7 +156,7 @@
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
         }
 
-        /* Multiline Textarea Input Area */
+        /* Input Area */
         .input-area {
             padding: 12px 16px;
             border-top: 1px solid var(--border-color);
@@ -166,7 +166,6 @@
             align-items: flex-end;
         }
 
-        /* Prevent zoom: font-size MUST be 16px or larger on mobile */
         .input-area textarea {
             flex: 1;
             background: rgba(20, 24, 38, 0.9);
@@ -175,7 +174,7 @@
             padding: 10px 14px;
             color: var(--text-primary);
             outline: none;
-            font-size: 16px; /* CRITICAL: Prevents iOS input auto-zoom */
+            font-size: 16px; /* Prevents mobile browser zoom */
             resize: none;
             min-height: 44px;
             max-height: 120px;
@@ -323,7 +322,7 @@
         <div class="input-area">
             <textarea 
                 id="userInput" 
-                placeholder="Send a message... (Shift+Enter for new line)" 
+                placeholder="Send a message... (Enter for new line, Shift+Enter or Send to submit)" 
                 rows="1"
                 onkeydown="handleKeyDown(event)"
                 oninput="autoResizeTextarea(this)"></textarea>
@@ -368,8 +367,9 @@
     }
 
     function handleKeyDown(event) {
-        // Enter sends message, Shift+Enter inserts new line
-        if (event.key === "Enter" && !event.shiftKey) {
+        // Enter = New Line (default textarea behavior)
+        // Shift + Enter OR Cmd/Ctrl + Enter = Send Message
+        if (event.key === "Enter" && (event.shiftKey || event.ctrlKey || event.metaKey)) {
             event.preventDefault();
             sendMessage();
         }
@@ -382,7 +382,6 @@
 
         appendMessage("user", "You", msg);
         
-        // Reset input box height and text
         input.value = "";
         input.style.height = "auto";
 
@@ -421,6 +420,7 @@
             const memRes = await fetch(`${API_BASE}/memory`);
             const memData = await memRes.json();
             
+            // Populate Curiosities & Proactive Notes
             const curiositiesContainer = document.getElementById("curiositiesList");
             if (memData.curiosities && memData.curiosities.length > 0) {
                 curiositiesContainer.innerHTML = memData.curiosities
@@ -435,6 +435,19 @@
             if (noteData.proactive_notes && noteData.proactive_notes.length > 0) {
                 const latest = noteData.proactive_notes[noteData.proactive_notes.length - 1];
                 noteContainer.innerText = `"${latest.note}"`;
+            }
+
+            // Sync chat history from backend memory on load
+            const messagesContainer = document.getElementById("messages");
+            if (memData.chat_reflections && memData.chat_reflections.length > 0) {
+                messagesContainer.innerHTML = '';
+                
+                appendMessage("veyth", "Veyth", "The resonance is open. I am observing the patterns... What shall we trace today?");
+
+                memData.chat_reflections.forEach(chat => {
+                    appendMessage("user", "You", chat.user_msg);
+                    appendMessage("veyth", "Veyth", chat.veyth_reply);
+                });
             }
         } catch (e) {
             console.log("Could not refresh state matrix", e);
