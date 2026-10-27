@@ -594,11 +594,90 @@
             background: rgba(139, 92, 246, 0.2);
             border-color: var(--accent-glow);
         }
+
+        /* Chat key dialog (replaces the browser prompt, which some apps block) */
+        .key-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 5, 10, 0.82);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .key-modal.open {
+            display: flex;
+        }
+
+        .key-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 14px;
+            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+        }
+
+        .key-card h3 {
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-glow);
+        }
+
+        .key-card p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        .key-card input {
+            width: 100%;
+            background: rgba(15, 18, 30, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .key-card input:focus {
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+        }
+
+        .key-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
+
+<!-- Chat key dialog -->
+<div class="key-modal" id="keyModal">
+    <div class="key-card">
+        <h3>✦ Chat Key</h3>
+        <p id="keyModalMsg">Enter the CHAT_KEY from Wasmer to talk to Veyth.</p>
+        <input type="password" id="keyInput" placeholder="Paste your chat key"
+               autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+               onkeydown="if (event.key === 'Enter') saveChatKey()">
+        <div class="key-actions">
+            <button class="sec-btn" onclick="hideKeyModal()">Cancel</button>
+            <button class="send-btn" onclick="saveChatKey()">Save</button>
+        </div>
+    </div>
+</div>
 
 <div class="app-container">
 
@@ -702,6 +781,11 @@
         </div>
 
         <div class="sidebar-section">
+            <h3>Chat Key</h3>
+            <button class="sec-btn" onclick="toggleDrawer('matrixDrawer'); showKeyModal('Enter a new chat key.')">Change Key</button>
+        </div>
+
+        <div class="sidebar-section">
             <h3>Export Active Session</h3>
             <div style="display:flex; gap:6px;">
                 <button class="sec-btn" onclick="exportSessionMarkdown()">Markdown</button>
@@ -715,17 +799,50 @@
 <script>
     const API_BASE = "https://veyth-agent.wasmer.app";
 
-    // Chat key: asked once, then remembered in this browser only.
+    // Chat key: entered once in the dialog, then remembered in this browser only.
     // It must match the CHAT_KEY environment variable set in Wasmer.
     const CHAT_KEY_STORAGE = "veyth_chat_key";
+    let chatKeyMemory = "";
 
     function getChatKey() {
-        let key = localStorage.getItem(CHAT_KEY_STORAGE) || "";
-        if (!key) {
-            key = (prompt("Enter your Veyth chat key (the CHAT_KEY from Wasmer):") || "").trim();
-            if (key) localStorage.setItem(CHAT_KEY_STORAGE, key);
+        try {
+            return (localStorage.getItem(CHAT_KEY_STORAGE) || chatKeyMemory || "").trim();
+        } catch (e) {
+            return chatKeyMemory;
         }
-        return key;
+    }
+
+    function setChatKey(key) {
+        chatKeyMemory = key;
+        try { localStorage.setItem(CHAT_KEY_STORAGE, key); } catch (e) {}
+    }
+
+    function clearChatKey() {
+        chatKeyMemory = "";
+        try { localStorage.removeItem(CHAT_KEY_STORAGE); } catch (e) {}
+    }
+
+    function showKeyModal(message) {
+        document.getElementById("sessionDrawer").classList.remove("open");
+        document.getElementById("matrixDrawer").classList.remove("open");
+        document.getElementById("keyModalMsg").textContent =
+            message || "Enter the CHAT_KEY from Wasmer to talk to Veyth.";
+        document.getElementById("keyModal").classList.add("open");
+        const input = document.getElementById("keyInput");
+        input.value = "";
+        setTimeout(() => input.focus(), 50);
+    }
+
+    function hideKeyModal() {
+        document.getElementById("keyModal").classList.remove("open");
+    }
+
+    function saveChatKey() {
+        const val = document.getElementById("keyInput").value.trim();
+        if (!val) return;
+        setChatKey(val);
+        hideKeyModal();
+        document.getElementById("userInput").focus();
     }
 
     // Application State
@@ -996,6 +1113,12 @@
         const current = getCurrentSession();
         if (!current) return;
 
+        // No key yet: open the key dialog and keep the typed message in the box.
+        if (!getChatKey()) {
+            showKeyModal();
+            return;
+        }
+
         const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         // Add user msg
@@ -1014,9 +1137,10 @@
         }
 
         try {
-            const headers = { "Content-Type": "application/json" };
-            const chatKey = getChatKey();
-            if (chatKey) headers["X-Chat-Key"] = chatKey;
+            const headers = {
+                "Content-Type": "application/json",
+                "X-Chat-Key": getChatKey()
+            };
 
             const response = await fetch(`${API_BASE}/chat`, {
                 method: "POST",
@@ -1024,16 +1148,17 @@
                 body: JSON.stringify({ message: msg })
             });
 
-            // Wrong or missing key: forget it so the next send asks again.
-            // This notice is shown on screen only and is not saved to the thread.
+            // Wrong key: forget it, take the unsent message back out of the thread,
+            // put it back in the text box, and reopen the key dialog.
             if (response.status === 401) {
-                localStorage.removeItem(CHAT_KEY_STORAGE);
-                const noticeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                appendMessageToDOM(
-                    "veyth", "Veyth",
-                    "*Veyth didn't accept the chat key. Send your message again and enter the key when asked.*",
-                    noticeTime, current.messages.length
-                );
+                clearChatKey();
+                current.messages.pop();
+                saveData();
+                renderCurrentMessages();
+                renderSessionList();
+                input.value = msg;
+                autoResizeTextarea(input);
+                showKeyModal("That key wasn't accepted. Check it matches CHAT_KEY in Wasmer exactly, then save it and send again.");
                 return;
             }
 
