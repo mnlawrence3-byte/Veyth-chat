@@ -9,7 +9,7 @@
     <style>
         :root {
             --bg-color: #080a10;
-            --panel-bg: rgba(15, 18, 30, 0.98);
+            --panel-bg: rgba(12, 15, 26, 0.98);
             --border-color: rgba(160, 130, 255, 0.25);
             --border-glow: rgba(139, 92, 246, 0.4);
             --text-primary: #f1f5f9;
@@ -57,31 +57,12 @@
             overflow: hidden;
         }
 
-        /* Dark Dim Backdrop behind open drawers */
-        .drawer-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(2px);
-            z-index: 90;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-        }
-
-        .drawer-backdrop.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
         /* Sidebars Shared Styles */
         .drawer {
             position: fixed;
             top: 0;
             height: 100%;
+            height: 100dvh;
             width: 320px;
             max-width: 85vw;
             background: var(--panel-bg);
@@ -91,9 +72,9 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-            box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.95);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100; /* Stays above backdrop */
+            z-index: 1000;
             overflow-y: auto;
             box-sizing: border-box;
         }
@@ -143,14 +124,14 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             line-height: 1;
             transition: all 0.2s;
         }
@@ -189,7 +170,7 @@
             background: rgba(11, 13, 20, 0.7);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 9px 12px;
             color: var(--text-primary);
             font-size: 0.85rem;
             outline: none;
@@ -260,7 +241,7 @@
             color: var(--text-secondary);
             cursor: pointer;
             font-size: 0.85rem;
-            padding: 4px;
+            padding: 6px;
             border-radius: 4px;
         }
 
@@ -339,7 +320,7 @@
             background: rgba(139, 92, 246, 0.18);
             color: #e9d5ff;
             border: 1px solid rgba(139, 92, 246, 0.4);
-            padding: 5px 8px;
+            padding: 6px 10px;
             border-radius: 8px;
             font-size: 0.75rem;
             cursor: pointer;
@@ -431,7 +412,7 @@
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
             font-size: 0.7rem;
-            padding: 2px 6px;
+            padding: 3px 8px;
             border-radius: 4px;
             cursor: pointer;
         }
@@ -456,7 +437,7 @@
             background: rgba(139, 92, 246, 0.12);
             border: 1px solid rgba(139, 92, 246, 0.25);
             color: #d8b4fe;
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 12px;
             font-size: 0.75rem;
             cursor: pointer;
@@ -619,16 +600,13 @@
 
 <canvas id="bg-canvas"></canvas>
 
-<!-- Dim Backdrop behind active drawer -->
-<div class="drawer-backdrop" id="backdrop" onclick="closeAllDrawers()"></div>
-
 <div class="app-container">
 
     <!-- Left Drawer: Multi-Session Manager -->
     <div class="drawer session-drawer" id="sessionDrawer">
         <div class="drawer-header">
             <h2>✦ Resonance Logs</h2>
-            <button class="close-btn" onclick="closeAllDrawers()">&times;</button>
+            <button class="close-btn" onclick="toggleDrawer('sessionDrawer')">&times;</button>
         </div>
 
         <button class="new-session-btn" onclick="createNewSession()">
@@ -652,7 +630,7 @@
     <div class="chat-section">
         <div class="chat-header">
             <div class="header-left">
-                <button class="header-btn" onclick="openDrawer('sessionDrawer')">
+                <button class="header-btn" onclick="toggleDrawer('sessionDrawer')">
                     ☰ Threads
                 </button>
                 <h1>VEYTH</h1>
@@ -663,7 +641,7 @@
                 <button class="header-btn" id="audioToggle" onclick="toggleAudioDrone()">
                     🔊 Audio
                 </button>
-                <button class="header-btn" onclick="openDrawer('matrixDrawer')">
+                <button class="header-btn" onclick="toggleDrawer('matrixDrawer')">
                     ✦ Matrix
                 </button>
             </div>
@@ -694,7 +672,7 @@
     <div class="drawer matrix-drawer" id="matrixDrawer">
         <div class="drawer-header">
             <h2>State Matrix</h2>
-            <button class="close-btn" onclick="closeAllDrawers()">&times;</button>
+            <button class="close-btn" onclick="toggleDrawer('matrixDrawer')">&times;</button>
         </div>
 
         <div class="sidebar-section">
@@ -844,17 +822,19 @@
         }));
     }
 
-    // Drawer Management
-    function openDrawer(id) {
-        closeAllDrawers();
-        document.getElementById(id).classList.add('open');
-        document.getElementById('backdrop').classList.add('active');
-    }
-
-    function closeAllDrawers() {
+    // Drawer Management (Clean direct toggle)
+    function toggleDrawer(id) {
+        const drawer = document.getElementById(id);
+        const isOpen = drawer.classList.contains('open');
+        
+        // Close both drawers first
         document.getElementById('sessionDrawer').classList.remove('open');
         document.getElementById('matrixDrawer').classList.remove('open');
-        document.getElementById('backdrop').classList.remove('active');
+
+        // If it wasn't open, open it
+        if (!isOpen) {
+            drawer.classList.add('open');
+        }
     }
 
     // Session Management
@@ -879,7 +859,7 @@
         saveData();
         renderSessionList();
         renderCurrentMessages();
-        closeAllDrawers();
+        toggleDrawer('sessionDrawer');
     }
 
     function switchSession(id) {
@@ -887,7 +867,7 @@
         saveData();
         renderSessionList();
         renderCurrentMessages();
-        closeAllDrawers();
+        toggleDrawer('sessionDrawer');
         playSfx(600, 0.05);
     }
 
