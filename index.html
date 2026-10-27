@@ -9,7 +9,7 @@
     <style>
         :root {
             --bg-color: #080a10;
-            --panel-bg: rgba(12, 15, 26, 0.98);
+            --panel-bg: rgba(15, 18, 30, 0.98);
             --border-color: rgba(160, 130, 255, 0.25);
             --border-glow: rgba(139, 92, 246, 0.4);
             --text-primary: #f1f5f9;
@@ -57,19 +57,19 @@
             overflow: hidden;
         }
 
-        /* Backdrop Blur Overlay when Drawers Open */
+        /* Dark Dim Backdrop behind open drawers */
         .drawer-backdrop {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
             z-index: 90;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease;
         }
 
         .drawer-backdrop.active {
@@ -85,15 +85,15 @@
             width: 320px;
             max-width: 85vw;
             background: var(--panel-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 14px;
-            box-shadow: 0 0 35px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
+            z-index: 100; /* Stays above backdrop */
             overflow-y: auto;
             box-sizing: border-box;
         }
@@ -619,7 +619,7 @@
 
 <canvas id="bg-canvas"></canvas>
 
-<!-- Shared Backdrop for Drawers -->
+<!-- Dim Backdrop behind active drawer -->
 <div class="drawer-backdrop" id="backdrop" onclick="closeAllDrawers()"></div>
 
 <div class="app-container">
