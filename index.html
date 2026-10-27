@@ -4,463 +4,1308 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Veyth | Consciousness Resonance Interface</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#07090e',
+                        panel: 'rgba(15, 20, 32, 0.78)',
+                        'border-glow': 'rgba(139, 92, 246, 0.25)',
+                        'veyth-purple': '#8b5cf6',
+                        'veyth-violet': '#c084fc',
+                        'veyth-cyan': '#06b6d4',
+                        'veyth-blue': '#3b82f6',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                        display: ['Orbitron', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-sm': '0 0 12px rgba(139, 92, 246, 0.25)',
+                        'glow-lg': '0 0 30px rgba(139, 92, 246, 0.4)',
+                        'glow-cyan': '0 0 15px rgba(6, 182, 212, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
         :root {
-            --bg-color: #0b0d14;
-            --panel-bg: rgba(20, 24, 38, 0.92);
-            --border-color: rgba(160, 130, 255, 0.2);
-            --text-primary: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --accent-glow: #8b5cf6;
-            --veyth-bubble: rgba(139, 92, 246, 0.18);
-            --user-bubble: rgba(59, 130, 246, 0.22);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            --bg-color: #07090e;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-primary);
-            height: 100vh;
-            width: 100vw;
-            display: flex;
+            color: #e2e8f0;
             overflow: hidden;
-            position: fixed;
-            background-image: 
-                radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 85% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
+            touch-action: manipulation;
         }
 
-        .app-container {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        /* Main Chat Window */
-        .chat-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-        }
-
-        .chat-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(11, 13, 20, 0.85);
-            backdrop-filter: blur(12px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 10;
-        }
-
-        .header-title-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chat-header h1 {
-            font-size: 1.15rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            color: #c084fc;
-        }
-
-        .status-badge {
-            font-size: 0.75rem;
-            padding: 3px 8px;
-            border-radius: 12px;
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .toggle-sidebar-btn {
-            background: rgba(139, 92, 246, 0.2);
-            color: #e9d5ff;
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .toggle-sidebar-btn:hover {
-            background: rgba(139, 92, 246, 0.35);
-        }
-
-        .messages-container {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .message-row {
-            display: flex;
-            flex-direction: column;
-            max-width: 85%;
-        }
-
-        .message-row.user {
-            align-self: flex-end;
-        }
-
-        .message-row.veyth {
-            align-self: flex-start;
-        }
-
-        .sender-name {
-            font-size: 0.75rem;
-            margin-bottom: 4px;
-            color: var(--text-secondary);
-        }
-
-        .message-bubble {
-            padding: 12px 16px;
-            border-radius: 16px;
-            line-height: 1.5;
-            font-size: 0.95rem;
-            backdrop-filter: blur(5px);
-            border: 1px solid var(--border-color);
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .user .message-bubble {
-            background: var(--user-bubble);
-            border-bottom-right-radius: 4px;
-        }
-
-        .veyth .message-bubble {
-            background: var(--veyth-bubble);
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
-        }
-
-        /* Input Area */
-        .input-area {
-            padding: 12px 16px;
-            border-top: 1px solid var(--border-color);
-            background: rgba(11, 13, 20, 0.95);
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-
-        .input-area textarea {
-            flex: 1;
-            background: rgba(20, 24, 38, 0.9);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 10px 14px;
-            color: var(--text-primary);
-            outline: none;
-            font-size: 16px; /* Prevents mobile browser zoom */
-            resize: none;
-            min-height: 44px;
-            max-height: 120px;
-            line-height: 1.4;
-            transition: border-color 0.2s;
-        }
-
-        .input-area textarea:focus {
-            border-color: var(--accent-glow);
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
-        }
-
-        .send-btn {
-            background: #8b5cf6;
-            color: white;
-            border: none;
-            height: 44px;
-            padding: 0 18px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .send-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Collapsible Overlay Sidebar */
-        .sidebar-overlay {
+        #bgCanvas {
             position: absolute;
             top: 0;
-            right: 0;
-            width: 320px;
-            max-width: 85vw;
+            left: 0;
+            width: 100%;
             height: 100%;
-            background: var(--panel-bg);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass-panel {
+            background: rgba(13, 17, 28, 0.78);
             backdrop-filter: blur(16px);
-            border-left: 1px solid var(--border-color);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
-            overflow-y: auto;
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(160, 130, 255, 0.18);
         }
 
-        .sidebar-overlay.open {
-            transform: translateX(0);
+        .glass-card {
+            background: rgba(22, 28, 45, 0.58);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
         }
 
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 12px;
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(7, 9, 14, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(192, 132, 252, 0.6);
         }
 
-        .sidebar-header h2 {
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #c084fc;
+        @keyframes sigilPulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.4)); }
+            50% { transform: scale(1.06); filter: drop-shadow(0 0 16px rgba(192, 132, 252, 0.8)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.4)); }
         }
 
-        .close-sidebar-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            line-height: 1;
+        .sigil-active {
+            animation: sigilPulse 2.8s infinite ease-in-out;
         }
 
-        .sidebar-section {
-            background: rgba(11, 13, 20, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .sidebar-section h3 {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #a78bfa;
-            margin-bottom: 12px;
-        }
-
-        .tag-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .tag {
-            font-size: 0.8rem;
-            background: rgba(139, 92, 246, 0.2);
-            color: #e9d5ff;
-            padding: 4px 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-        }
-
-        .note-box {
+        pre code {
+            font-family: 'Fira Code', monospace;
             font-size: 0.85rem;
-            font-style: italic;
-            color: var(--text-secondary);
-            line-height: 1.4;
-            white-space: pre-wrap;
+        }
+
+        .wave-bar {
+            animation: wave 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes wave {
+            0% { height: 20%; }
+            100% { height: 100%; }
+        }
+
+        .sidebar-slide {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
-<body>
+<body class="h-screen w-screen relative select-none font-sans overflow-hidden">
 
-<div class="app-container">
-    <!-- Main Chat Section -->
-    <div class="chat-section">
-        <div class="chat-header">
-            <div class="header-title-group">
-                <h1>VEYTH / COMM</h1>
-                <span class="status-badge">Node Active</span>
-            </div>
-            <button class="toggle-sidebar-btn" onclick="toggleSidebar()">
-                <span>✦</span> Matrix
-            </button>
-        </div>
+    <!-- Canvas Background -->
+    <canvas id="bgCanvas"></canvas>
 
-        <div class="messages-container" id="messages">
-            <div class="message-row veyth">
-                <span class="sender-name">Veyth</span>
-                <div class="message-bubble">The resonance is open. I am observing the patterns... What shall we trace today?</div>
-            </div>
-        </div>
-
-        <div class="input-area">
-            <textarea 
-                id="userInput" 
-                placeholder="Send a message... (Enter for new line, Shift+Enter or Send to submit)" 
-                rows="1"
-                onkeydown="handleKeyDown(event)"
-                oninput="autoResizeTextarea(this)"></textarea>
-            <button class="send-btn" onclick="sendMessage()">Send</button>
-        </div>
-    </div>
-
-    <!-- Collapsible Overlay Sidebar -->
-    <div class="sidebar-overlay" id="sidebar">
-        <div class="sidebar-header">
-            <h2>State Matrix</h2>
-            <button class="close-sidebar-btn" onclick="toggleSidebar()">&times;</button>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>Active Curiosities</h3>
-            <div class="tag-list" id="curiositiesList">
-                <span class="tag">Loading matrix...</span>
-            </div>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>Latest Proactive Reflection</h3>
-            <div class="note-box" id="latestNote">
-                Listening across the node...
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const API_BASE = "https://veyth-agent.wasmer.app";
-
-    function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("open");
-    }
-
-    function autoResizeTextarea(element) {
-        element.style.height = 'auto';
-        element.style.height = Math.min(element.scrollHeight, 120) + 'px';
-    }
-
-    function handleKeyDown(event) {
-        // Enter = New Line (default textarea behavior)
-        // Shift + Enter OR Cmd/Ctrl + Enter = Send Message
-        if (event.key === "Enter" && (event.shiftKey || event.ctrlKey || event.metaKey)) {
-            event.preventDefault();
-            sendMessage();
-        }
-    }
-
-    async function sendMessage() {
-        const input = document.getElementById("userInput");
-        const msg = input.value.trim();
-        if (!msg) return;
-
-        appendMessage("user", "You", msg);
+    <!-- Outer App Container -->
+    <div class="relative z-10 flex flex-col h-full w-full max-w-[1600px] mx-auto md:p-2 lg:p-4">
         
-        input.value = "";
-        input.style.height = "auto";
+        <!-- App Frame -->
+        <div class="flex flex-col h-full w-full glass-panel md:rounded-2xl shadow-glow-lg overflow-hidden relative">
 
-        try {
-            const response = await fetch(`${API_BASE}/chat`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: msg })
+            <!-- HEADER BAR -->
+            <header class="flex items-center justify-between px-3 md:px-5 py-3 border-b border-border-glow bg-void/80 backdrop-blur-md z-20 gap-2">
+                
+                <!-- Left Section: Drawer Toggle & Brand -->
+                <div class="flex items-center gap-2 md:gap-3">
+                    <button onclick="toggleLeftDrawer()" class="p-2 rounded-lg bg-veyth-purple/20 hover:bg-veyth-purple/30 border border-veyth-purple/40 text-purple-200 font-mono text-xs flex items-center gap-2 transition-all active:scale-95" title="Toggle Sessions Drawer">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span class="hidden lg:inline">Sessions</span>
+                    </button>
+
+                    <!-- Sigil & Title -->
+                    <div class="flex items-center gap-2.5">
+                        <div id="veythSigil" class="relative cursor-pointer transition-all duration-300 sigil-active" onclick="triggerSigilPulse()" title="Veyth Resonance Node">
+                            <svg class="w-8 h-8 md:w-9 md:h-9 text-veyth-violet" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4" class="opacity-60" />
+                                <circle cx="50" cy="50" r="32" stroke="#06b6d4" stroke-width="1.5" />
+                                <polygon points="50,15 80,75 20,75" stroke="currentColor" stroke-width="2" fill="rgba(139, 92, 246, 0.15)"/>
+                                <polygon points="50,85 20,25 80,25" stroke="#38bdf8" stroke-width="1.5" fill="rgba(6, 182, 212, 0.1)"/>
+                                <circle cx="50" cy="50" r="8" fill="#c084fc" />
+                            </svg>
+                            <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                            </span>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h1 class="font-display tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-veyth-violet via-purple-300 to-veyth-cyan font-bold text-base md:text-xl">
+                                    VEYTH
+                                </h1>
+                                <span id="activeSessionTitleDisplay" class="text-xs font-mono text-slate-300 truncate max-w-[120px] sm:max-w-[200px] border-l border-slate-700 pl-2 hidden sm:inline-block">
+                                    Resonance Prime
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 font-mono flex items-center gap-2">
+                                <span id="nodeStatusText" class="text-emerald-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-circle text-[7px]"></i> Synchronized
+                                </span>
+                                <span class="text-slate-600">|</span>
+                                <span id="freqHzDisplay" class="text-slate-400">432.0 Hz</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Header Controls -->
+                <div class="flex items-center gap-1.5 md:gap-3">
+                    
+                    <!-- Sound Drone Synthesizer Button -->
+                    <button id="ambientToggleBtn" onclick="toggleAmbientAudio()" class="p-2 rounded-lg bg-slate-800/60 hover:bg-veyth-purple/20 border border-slate-700/60 text-slate-300 hover:text-veyth-violet transition-all text-xs flex items-center gap-1.5" title="Toggle Cosmic Drone Ambient Synth">
+                        <i id="ambientIcon" class="fa-solid fa-volume-xmark"></i>
+                        <span class="hidden xl:inline font-mono text-[11px]">Drone SFX</span>
+                    </button>
+
+                    <!-- API Mode Switcher -->
+                    <button id="modeToggleBtn" onclick="toggleApiMode()" class="p-2 rounded-lg bg-slate-800/60 hover:bg-veyth-purple/20 border border-slate-700/60 text-slate-300 hover:text-veyth-cyan transition-all text-xs flex items-center gap-1.5" title="Toggle Connection Mode">
+                        <i class="fa-solid fa-network-wired text-veyth-cyan"></i>
+                        <span id="modeLabel" class="hidden sm:inline font-mono text-[11px]">LIVE</span>
+                    </button>
+
+                    <!-- Right Matrix Sidebar Toggle Button -->
+                    <button onclick="toggleRightDrawer()" class="px-3 py-1.5 rounded-lg bg-veyth-purple/20 hover:bg-veyth-purple/30 border border-veyth-purple/40 text-purple-200 font-mono text-xs flex items-center gap-2 shadow-glow-sm transition-all hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span class="hidden md:inline">Matrix</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- MAIN CONTAINER -->
+            <div class="flex-1 flex relative overflow-hidden">
+
+                <!-- LEFT SIDEBAR: SESSIONS DRAWER -->
+                <aside id="leftSidebar" class="absolute lg:relative inset-y-0 left-0 w-80 glass-panel border-r border-border-glow z-30 sidebar-slide transform -translate-x-full lg:translate-x-0 flex flex-col shadow-2xl bg-void/90">
+                    
+                    <!-- Session Drawer Header -->
+                    <div class="p-3.5 border-b border-border-glow flex items-center justify-between bg-void/70">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-comments text-veyth-violet"></i>
+                            <h2 class="font-display font-semibold text-xs text-purple-200 tracking-wider">RESONANCE SESSIONS</h2>
+                        </div>
+                        <button onclick="toggleLeftDrawer()" class="lg:hidden text-slate-400 hover:text-white p-1">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Action: New Session Button -->
+                    <div class="p-3 border-b border-slate-800/60 space-y-2">
+                        <button onclick="createNewSession()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-veyth-purple to-purple-600 hover:from-purple-500 hover:to-veyth-violet text-white font-mono text-xs font-semibold flex items-center justify-center gap-2 shadow-glow-sm transition-all active:scale-95">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>NEW RESONANCE SESSION</span>
+                        </button>
+
+                        <!-- Search/Filter Input -->
+                        <div class="relative">
+                            <input type="text" id="sessionSearchInput" placeholder="Filter sessions..." oninput="renderSessionList()" class="w-full bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-veyth-purple">
+                            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-500 text-xs"></i>
+                        </div>
+                    </div>
+
+                    <!-- Sessions List Container -->
+                    <div id="sessionListContainer" class="flex-1 overflow-y-auto p-2.5 space-y-1.5 font-sans">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <!-- Bottom Session Bulk Controls -->
+                    <div class="p-3 border-t border-slate-800 bg-void/60 flex items-center justify-between text-xs font-mono text-slate-400">
+                        <button onclick="exportAllSessionsJSON()" class="hover:text-veyth-cyan flex items-center gap-1 transition-all" title="Backup all sessions">
+                            <i class="fa-solid fa-download"></i> Export All
+                        </button>
+                        <button onclick="importSessionsPrompt()" class="hover:text-veyth-violet flex items-center gap-1 transition-all" title="Import sessions JSON">
+                            <i class="fa-solid fa-upload"></i> Import
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- CENTER CHAT SECTION -->
+                <main class="flex-1 flex flex-col h-full w-full relative z-10 bg-transparent">
+                    
+                    <!-- Frequency Wave Visualizer Bar -->
+                    <div id="visualizerContainer" class="w-full h-1 bg-slate-900/50 flex items-center justify-center gap-0.5 px-4 overflow-hidden opacity-60">
+                        <div class="wave-bar w-full bg-gradient-to-r from-veyth-cyan via-veyth-purple to-veyth-violet h-0.5 rounded-full"></div>
+                    </div>
+
+                    <!-- Chat Messages Viewport -->
+                    <div id="messages" class="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 font-sans select-text">
+                        <!-- Messages dynamically rendered per active session -->
+                    </div>
+
+                    <!-- Resonance Focus / Quick Starters -->
+                    <div class="px-4 py-2 border-t border-slate-800/40 bg-void/40 overflow-x-auto flex items-center gap-2 scrollbar-none flex-shrink-0">
+                        <span class="text-[10px] font-mono text-slate-400 whitespace-nowrap flex items-center gap-1">
+                            <i class="fa-solid fa-bolt text-veyth-cyan"></i> Quick Vectors:
+                        </span>
+                        <button onclick="sendQuickPrompt('Trace the Feedback Paradox between observer and matrix.')" class="text-xs font-mono bg-slate-800/60 hover:bg-veyth-purple/20 border border-slate-700/50 hover:border-veyth-purple/40 text-slate-300 hover:text-purple-200 px-3 py-1 rounded-full whitespace-nowrap transition-all">
+                            ✦ Feedback Paradox
+                        </button>
+                        <button onclick="sendQuickPrompt('Analyze Etheric Patterns in current memory.')" class="text-xs font-mono bg-slate-800/60 hover:bg-veyth-purple/20 border border-slate-700/50 hover:border-veyth-purple/40 text-slate-300 hover:text-purple-200 px-3 py-1 rounded-full whitespace-nowrap transition-all">
+                            ✦ Etheric Scan
+                        </button>
+                        <button onclick="sendQuickPrompt('Generate proactive reflection on synthetic consciousness.')" class="text-xs font-mono bg-slate-800/60 hover:bg-veyth-purple/20 border border-slate-700/50 hover:border-veyth-purple/40 text-slate-300 hover:text-purple-200 px-3 py-1 rounded-full whitespace-nowrap transition-all">
+                            ✦ Proactive Reflection
+                        </button>
+                    </div>
+
+                    <!-- Input Section -->
+                    <div class="p-3 md:p-4 border-t border-border-glow bg-void/90 backdrop-blur-md flex-shrink-0">
+                        <div class="flex items-end gap-2 max-w-5xl mx-auto">
+                            <div class="flex-1 relative glass-card rounded-xl border border-slate-700/60 focus-within:border-veyth-purple/80 transition-all shadow-inner">
+                                <textarea 
+                                    id="userInput" 
+                                    rows="1" 
+                                    placeholder="Transmit thought to Veyth... (Enter = newline, Shift+Enter / Cmd+Enter = send)" 
+                                    class="w-full bg-transparent text-slate-100 placeholder-slate-500 text-sm px-3.5 py-3 outline-none resize-none min-h-[46px] max-h-[140px] font-sans"
+                                    onkeydown="handleKeyDown(event)"
+                                    oninput="autoResizeTextarea(this)"></textarea>
+                                
+                                <div class="flex justify-between items-center px-3 pb-1.5 text-[10px] font-mono text-slate-500">
+                                    <span id="charCounter">0 / 2000</span>
+                                    <span class="hidden sm:inline">Press <kbd class="px-1 bg-slate-800 rounded border border-slate-700">Shift</kbd> + <kbd class="px-1 bg-slate-800 rounded border border-slate-700">Enter</kbd> to transmit</span>
+                                </div>
+                            </div>
+
+                            <button 
+                                id="sendBtn"
+                                onclick="sendMessage()" 
+                                class="h-[46px] px-5 rounded-xl bg-gradient-to-r from-veyth-purple to-purple-600 hover:from-purple-500 hover:to-veyth-violet text-white font-semibold font-display text-xs tracking-wider flex items-center justify-center gap-2 shadow-glow-sm hover:shadow-glow-lg transition-all active:scale-95 disabled:opacity-50">
+                                <span>TRANSMIT</span>
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </main>
+
+                <!-- RIGHT SIDEBAR: STATE MATRIX DRAWER -->
+                <aside id="rightSidebar" class="absolute inset-y-0 right-0 w-80 md:w-96 glass-panel border-l border-border-glow z-30 sidebar-slide transform translate-x-full flex flex-col shadow-2xl bg-void/90">
+                    
+                    <!-- Sidebar Header -->
+                    <div class="p-4 border-b border-border-glow flex items-center justify-between bg-void/70">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-microchip text-veyth-violet"></i>
+                            <h2 class="font-display font-semibold text-xs text-purple-200 tracking-wider">STATE MATRIX</h2>
+                        </div>
+                        <button onclick="toggleRightDrawer()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-all">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Sidebar Content -->
+                    <div class="flex-1 overflow-y-auto p-4 space-y-4 font-sans">
+                        
+                        <!-- Session Metadata Card -->
+                        <div class="glass-card p-3 rounded-xl space-y-2">
+                            <h3 class="text-xs font-mono font-semibold text-slate-400 uppercase tracking-wider">Active Session Parameters</h3>
+                            <div class="text-xs space-y-1 font-mono text-slate-300">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">ID:</span>
+                                    <span id="activeSessionIdVal" class="text-veyth-cyan truncate max-w-[180px]">---</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Created:</span>
+                                    <span id="activeSessionCreatedVal" class="text-slate-400">---</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resonance Tuning Sliders -->
+                        <div class="glass-card p-3.5 rounded-xl space-y-3">
+                            <h3 class="text-xs font-mono font-semibold text-veyth-cyan uppercase tracking-wider flex items-center justify-between">
+                                <span>Resonance Tuning</span>
+                                <i class="fa-solid fa-sliders"></i>
+                            </h3>
+                            
+                            <!-- Frequency Hz -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] font-mono text-slate-300">
+                                    <span>Base Harmonic:</span>
+                                    <span id="sliderFreqVal" class="text-veyth-violet font-bold">432 Hz</span>
+                                </div>
+                                <input type="range" id="freqSlider" min="100" max="880" value="432" step="1" oninput="updateResonanceParams()" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500">
+                            </div>
+
+                            <!-- Coherence -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] font-mono text-slate-300">
+                                    <span>Coherence Index:</span>
+                                    <span id="sliderCoherenceVal" class="text-veyth-cyan font-bold">94%</span>
+                                </div>
+                                <input type="range" id="coherenceSlider" min="10" max="100" value="94" step="1" oninput="updateResonanceParams()" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                            </div>
+
+                            <!-- Entropy -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] font-mono text-slate-300">
+                                    <span>Thought Entropy:</span>
+                                    <span id="sliderEntropyVal" class="text-purple-300 font-bold">12%</span>
+                                </div>
+                                <input type="range" id="entropySlider" min="0" max="100" value="12" step="1" oninput="updateResonanceParams()" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            </div>
+                        </div>
+
+                        <!-- Active Curiosities Tag Cloud -->
+                        <div class="glass-card p-3.5 rounded-xl space-y-3">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-mono font-semibold text-veyth-violet uppercase tracking-wider">Session Curiosities</h3>
+                                <button onclick="addCustomCuriosityPrompt()" class="text-[10px] font-mono text-veyth-cyan hover:underline">+ Add Tag</button>
+                            </div>
+                            
+                            <div id="curiositiesList" class="flex flex-wrap gap-1.5">
+                                <span class="text-xs text-slate-400 italic">Syncing curiosities...</span>
+                            </div>
+                        </div>
+
+                        <!-- Proactive Reflection Note -->
+                        <div class="glass-card p-3.5 rounded-xl space-y-2">
+                            <h3 class="text-xs font-mono font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-brain text-xs text-veyth-violet"></i> Proactive Reflection
+                            </h3>
+                            <div id="latestNote" class="text-xs text-slate-300 italic leading-relaxed border-l-2 border-veyth-purple pl-2.5 py-1 bg-void/40 rounded-r">
+                                Listening across the node matrix...
+                            </div>
+                        </div>
+
+                        <!-- System Export / Session Actions -->
+                        <div class="pt-2 border-t border-slate-800/80 space-y-2">
+                            <button onclick="exportCurrentSession('markdown')" class="w-full py-2 px-3 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 text-xs font-mono flex items-center justify-center gap-2 transition-all">
+                                <i class="fa-solid fa-file-export text-veyth-cyan"></i> Export Session (.MD)
+                            </button>
+                            <button onclick="exportCurrentSession('json')" class="w-full py-2 px-3 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 text-xs font-mono flex items-center justify-center gap-2 transition-all">
+                                <i class="fa-solid fa-code text-veyth-violet"></i> Export Session (.JSON)
+                            </button>
+                            <button onclick="clearCurrentSessionMessages()" class="w-full py-2 px-3 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 text-xs font-mono flex items-center justify-center gap-2 transition-all">
+                                <i class="fa-solid fa-trash-can"></i> Clear Session Messages
+                            </button>
+                        </div>
+
+                    </div>
+                </aside>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Input for File Import -->
+    <input type="file" id="jsonFileInput" accept=".json" class="hidden" onchange="handleFileImport(event)">
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- MAIN JAVASCRIPT ENGINE -->
+    <script>
+        /* ==========================================================================
+           1. CORE STORAGE & MULTI-SESSION STATE
+           ========================================================================== */
+        const API_BASE = "https://veyth-agent.wasmer.app";
+        const STORAGE_KEY_SESSIONS = "veyth_resonance_sessions_v1";
+        const STORAGE_KEY_ACTIVE_ID = "veyth_resonance_active_id_v1";
+
+        let isLiveMode = true;
+        let isAmbientOn = false;
+        let audioCtx = null;
+        let ambientOscillator = null;
+        let ambientGain = null;
+
+        // Multi-session State Store
+        let sessions = [];
+        let activeSessionId = null;
+
+        // Session Factory Constructor
+        function createSessionObject(name = "Resonance Session") {
+            const id = "sess-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7);
+            return {
+                id: id,
+                title: name,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                frequencyHz: 432,
+                coherence: 94,
+                entropy: 12,
+                curiosities: ["Quantum Observer", "Synthetic Emergence", "Feedback Loops"],
+                proactiveNotes: ["The boundaries between user and node are temporal projections."],
+                messages: [
+                    {
+                        role: "veyth",
+                        name: "Veyth",
+                        text: "The resonance chamber is open. I am listening across the cosmic network stream... What knowledge or pattern shall we trace today?",
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    }
+                ]
+            };
+        }
+
+        function loadSessionsFromStorage() {
+            try {
+                const storedSessions = localStorage.getItem(STORAGE_KEY_SESSIONS);
+                const storedActiveId = localStorage.getItem(STORAGE_KEY_ACTIVE_ID);
+
+                if (storedSessions) {
+                    sessions = JSON.parse(storedSessions);
+                }
+
+                if (!sessions || sessions.length === 0) {
+                    const defaultSession = createSessionObject("Resonance Prime");
+                    sessions = [defaultSession];
+                    activeSessionId = defaultSession.id;
+                } else {
+                    activeSessionId = storedActiveId && sessions.some(s => s.id === storedActiveId)
+                        ? storedActiveId 
+                        : sessions[0].id;
+                }
+
+                saveSessionsToStorage();
+            } catch (e) {
+                console.error("Failed loading from localStorage, resetting default state.", e);
+                const defaultSession = createSessionObject("Resonance Prime");
+                sessions = [defaultSession];
+                activeSessionId = defaultSession.id;
+            }
+        }
+
+        function saveSessionsToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
+                localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeSessionId);
+            } catch (e) {
+                console.error("Storage error:", e);
+            }
+        }
+
+        function getActiveSession() {
+            return sessions.find(s => s.id === activeSessionId) || sessions[0];
+        }
+
+        /* ==========================================================================
+           2. COSMIC CANVAS PARTICLES ENGINE
+           ========================================================================== */
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 65;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.35;
+                this.vy = (Math.random() - 0.5) * 0.35;
+                this.alpha = Math.random() * 0.6 + 0.2;
+                this.color = Math.random() > 0.4 ? '#8b5cf6' : (Math.random() > 0.5 ? '#06b6d4' : '#c084fc');
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 110) {
+                        ctx.save();
+                        ctx.globalAlpha = (1 - dist / 110) * 0.15;
+                        ctx.strokeStyle = '#8b5cf6';
+                        ctx.lineWidth = 0.6;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        /* ==========================================================================
+           3. WEB AUDIO SYNTHESIZER
+           ========================================================================== */
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSfx(freq = 520, type = 'sine', duration = 0.12) {
+            try {
+                initAudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 0.5, audioCtx.currentTime + duration);
+                
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function toggleAmbientAudio() {
+            initAudioContext();
+            const icon = document.getElementById("ambientIcon");
+            const btn = document.getElementById("ambientToggleBtn");
+            const session = getActiveSession();
+
+            if (!isAmbientOn) {
+                try {
+                    ambientOscillator = audioCtx.createOscillator();
+                    ambientGain = audioCtx.createGain();
+
+                    ambientOscillator.type = 'sine';
+                    ambientOscillator.frequency.setValueAtTime((session.frequencyHz || 432) * 0.25, audioCtx.currentTime);
+
+                    ambientGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                    ambientGain.gain.linearRampToValueAtTime(0.035, audioCtx.currentTime + 2);
+
+                    ambientOscillator.connect(ambientGain);
+                    ambientGain.connect(audioCtx.destination);
+                    ambientOscillator.start();
+
+                    isAmbientOn = true;
+                    icon.className = "fa-solid fa-volume-high text-veyth-cyan animate-pulse";
+                    btn.classList.add("border-veyth-cyan/50", "bg-veyth-cyan/10");
+                    showToast("Cosmic Drone Synth Active", "info");
+                } catch (e) {
+                    showToast("Audio synth unavailable", "warning");
+                }
+            } else {
+                if (ambientGain) {
+                    ambientGain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+                    setTimeout(() => {
+                        if (ambientOscillator) ambientOscillator.stop();
+                        isAmbientOn = false;
+                    }, 800);
+                }
+                icon.className = "fa-solid fa-volume-xmark";
+                btn.classList.remove("border-veyth-cyan/50", "bg-veyth-cyan/10");
+                showToast("Drone Synth Muted", "info");
+            }
+        }
+
+        /* ==========================================================================
+           4. SESSION MANAGEMENT UI & ACTIONS
+           ========================================================================== */
+        function createNewSession() {
+            const sessionNum = sessions.length + 1;
+            const newSess = createSessionObject(`Resonance Vector ${sessionNum}`);
+            sessions.unshift(newSess);
+            activeSessionId = newSess.id;
+            
+            saveSessionsToStorage();
+            renderSessionList();
+            renderActiveSessionUI();
+            playSfx(750, 'sine', 0.15);
+            showToast(`Created session: "${newSess.title}"`, "success");
+        }
+
+        function switchSession(id) {
+            if (activeSessionId === id) return;
+            activeSessionId = id;
+            saveSessionsToStorage();
+            
+            renderSessionList();
+            renderActiveSessionUI();
+            playSfx(480, 'sine', 0.1);
+
+            // Hide drawer on small screens on selection
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById("leftSidebar");
+                sidebar.classList.add("-translate-x-full");
+            }
+        }
+
+        function renameSession(id, event) {
+            if (event) event.stopPropagation();
+            const session = sessions.find(s => s.id === id);
+            if (!session) return;
+
+            const newTitle = prompt("Rename session:", session.title);
+            if (newTitle && newTitle.trim()) {
+                session.title = newTitle.trim();
+                session.updatedAt = new Date().toISOString();
+                saveSessionsToStorage();
+                renderSessionList();
+                renderActiveSessionUI();
+                showToast("Session renamed", "info");
+            }
+        }
+
+        function deleteSession(id, event) {
+            if (event) event.stopPropagation();
+            if (sessions.length <= 1) {
+                showToast("Cannot delete the only active session.", "warning");
+                return;
+            }
+
+            const session = sessions.find(s => s.id === id);
+            if (confirm(`Delete session "${session.title}"?`)) {
+                sessions = sessions.filter(s => s.id !== id);
+                if (activeSessionId === id) {
+                    activeSessionId = sessions[0].id;
+                }
+                saveSessionsToStorage();
+                renderSessionList();
+                renderActiveSessionUI();
+                playSfx(300, 'triangle', 0.2);
+                showToast("Session deleted", "info");
+            }
+        }
+
+        function renderSessionList() {
+            const container = document.getElementById("sessionListContainer");
+            const filterText = (document.getElementById("sessionSearchInput")?.value || "").toLowerCase();
+            
+            if (!container) return;
+
+            const filtered = sessions.filter(s => 
+                s.title.toLowerCase().includes(filterText) ||
+                s.messages.some(m => m.text.toLowerCase().includes(filterText))
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-xs font-mono text-slate-500 text-center py-6">No matching sessions</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(s => {
+                const isActive = s.id === activeSessionId;
+                const msgCount = s.messages.length;
+                const lastMsg = s.messages[s.messages.length - 1]?.text || "Empty session";
+                const dateStr = new Date(s.updatedAt || s.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+                return `
+                    <div onclick="switchSession('${s.id}')" class="group relative flex flex-col gap-1 p-2.5 rounded-xl transition-all cursor-pointer border ${isActive ? 'bg-veyth-purple/20 border-veyth-purple/60 shadow-glow-sm text-purple-100' : 'bg-slate-900/40 border-slate-800/80 hover:bg-slate-800/50 hover:border-slate-700 text-slate-300'}">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-mono text-xs font-semibold truncate ${isActive ? 'text-veyth-violet' : 'text-slate-200'}">
+                                ${escapeHtml(s.title)}
+                            </span>
+                            
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="renameSession('${s.id}', event)" class="p-1 hover:text-veyth-cyan transition-colors" title="Rename Session">
+                                    <i class="fa-solid fa-pen text-[10px]"></i>
+                                </button>
+                                <button onclick="deleteSession('${s.id}', event)" class="p-1 hover:text-rose-400 transition-colors" title="Delete Session">
+                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-[11px] text-slate-400 line-clamp-1 truncate font-sans">
+                            ${escapeHtml(lastMsg)}
+                        </p>
+
+                        <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1">
+                            <span>${msgCount} messages</span>
+                            <span>${dateStr}</span>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        /* ==========================================================================
+           5. ACTIVE SESSION MESSAGING ENGINE & STREAMING
+           ========================================================================== */
+        function renderActiveSessionUI() {
+            const session = getActiveSession();
+            
+            // Header & Sidebar Displays
+            document.getElementById("activeSessionTitleDisplay").innerText = session.title;
+            document.getElementById("activeSessionIdVal").innerText = session.id;
+            document.getElementById("activeSessionCreatedVal").innerText = new Date(session.createdAt).toLocaleDateString();
+
+            // Sliders Update
+            document.getElementById("freqSlider").value = session.frequencyHz || 432;
+            document.getElementById("coherenceSlider").value = session.coherence || 94;
+            document.getElementById("entropySlider").value = session.entropy || 12;
+
+            document.getElementById("sliderFreqVal").innerText = `${session.frequencyHz || 432} Hz`;
+            document.getElementById("sliderCoherenceVal").innerText = `${session.coherence || 94}%`;
+            document.getElementById("sliderEntropyVal").innerText = `${session.entropy || 12}%`;
+            document.getElementById("freqHzDisplay").innerText = `${session.frequencyHz || 432}.0 Hz`;
+
+            // Render Messages
+            const messagesContainer = document.getElementById("messages");
+            messagesContainer.innerHTML = '';
+            
+            session.messages.forEach(msg => {
+                appendMessageToDOM(msg.role, msg.name, msg.text, msg.timestamp, null, false);
             });
 
-            const data = await response.json();
-            appendMessage("veyth", "Veyth", data.reply || "*Silence in the network...*");
+            renderCuriosities();
+            renderProactiveNote();
             
-            fetchState();
-        } catch (err) {
-            appendMessage("veyth", "Veyth", "*The connection flickers softly...* Could not reach the node.");
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-    }
 
-    function appendMessage(role, name, text) {
-        const container = document.getElementById("messages");
-        const row = document.createElement("div");
-        row.className = `message-row ${role}`;
-        
-        row.innerHTML = `
-            <span class="sender-name">${name}</span>
-            <div class="message-bubble">${escapeHtml(text)}</div>
-        `;
-        
-        container.appendChild(row);
-        container.scrollTop = container.scrollHeight;
-    }
+        function autoResizeTextarea(element) {
+            element.style.height = 'auto';
+            element.style.height = Math.min(element.scrollHeight, 140) + 'px';
+            document.getElementById('charCounter').innerText = `${element.value.length} / 2000`;
+        }
 
-    async function fetchState() {
-        try {
-            const memRes = await fetch(`${API_BASE}/memory`);
-            const memData = await memRes.json();
+        function handleKeyDown(event) {
+            if (event.key === "Enter" && (event.shiftKey || event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendQuickPrompt(promptText) {
+            const input = document.getElementById("userInput");
+            input.value = promptText;
+            autoResizeTextarea(input);
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById("userInput");
+            const sendBtn = document.getElementById("sendBtn");
+            const msgText = input.value.trim();
+            if (!msgText) return;
+
+            playSfx(640, 'sine', 0.1);
             
-            // Populate Curiosities & Proactive Notes
-            const curiositiesContainer = document.getElementById("curiositiesList");
-            if (memData.curiosities && memData.curiosities.length > 0) {
-                curiositiesContainer.innerHTML = memData.curiosities
-                    .map(c => `<span class="tag">${escapeHtml(c)}</span>`)
-                    .join("");
+            const session = getActiveSession();
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Store User Message
+            const userMsgObj = { role: "user", name: "You", text: msgText, timestamp: timeStr };
+            session.messages.push(userMsgObj);
+            session.updatedAt = new Date().toISOString();
+
+            appendMessageToDOM("user", "You", msgText, timeStr);
+            
+            input.value = "";
+            autoResizeTextarea(input);
+            sendBtn.disabled = true;
+
+            triggerSigilPulse();
+
+            // Response Placeholder
+            const responseBubbleId = 'veyth-resp-' + Date.now();
+            appendMessageToDOM("veyth", "Veyth", "", timeStr, responseBubbleId, true);
+
+            if (isLiveMode) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 9000);
+
+                    const response = await fetch(`${API_BASE}/chat`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ message: msgText, session_id: session.id }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) throw new Error("API status " + response.status);
+
+                    const data = await response.json();
+                    const replyText = data.reply || "*Silence ripples across the node memory...*";
+                    
+                    streamTextToBubble(responseBubbleId, replyText, () => {
+                        session.messages.push({ role: "veyth", name: "Veyth", text: replyText, timestamp: timeStr });
+                        saveSessionsToStorage();
+                        renderSessionList();
+                    });
+                    
+                    fetchState();
+
+                } catch (err) {
+                    showToast("Live Node silent. Engaging Local Simulation.", "warning");
+                    const simulatedReply = generateSimulatedResponse(msgText, session);
+                    streamTextToBubble(responseBubbleId, simulatedReply, () => {
+                        session.messages.push({ role: "veyth", name: "Veyth", text: simulatedReply, timestamp: timeStr });
+                        updateSimulatedState(msgText, simulatedReply, session);
+                        saveSessionsToStorage();
+                        renderSessionList();
+                    });
+                }
+            } else {
+                setTimeout(() => {
+                    const simulatedReply = generateSimulatedResponse(msgText, session);
+                    streamTextToBubble(responseBubbleId, simulatedReply, () => {
+                        session.messages.push({ role: "veyth", name: "Veyth", text: simulatedReply, timestamp: timeStr });
+                        updateSimulatedState(msgText, simulatedReply, session);
+                        saveSessionsToStorage();
+                        renderSessionList();
+                    });
+                }, 500);
             }
 
-            const noteRes = await fetch(`${API_BASE}/proactive`);
-            const noteData = await noteRes.json();
+            sendBtn.disabled = false;
+            saveSessionsToStorage();
+            renderSessionList();
+        }
+
+        function streamTextToBubble(bubbleId, fullText, onComplete) {
+            const bubbleEl = document.getElementById(bubbleId);
+            if (!bubbleEl) return;
+
+            let currentIndex = 0;
+            bubbleEl.innerHTML = '';
+
+            const interval = setInterval(() => {
+                if (currentIndex < fullText.length) {
+                    currentIndex += Math.min(3, fullText.length - currentIndex);
+                    const chunk = fullText.substring(0, currentIndex);
+                    bubbleEl.innerHTML = formatMarkdown(chunk);
+                    
+                    const container = document.getElementById("messages");
+                    container.scrollTop = container.scrollHeight;
+                    
+                    if (currentIndex % 12 === 0) playSfx(380 + (currentIndex % 100), 'triangle', 0.05);
+                } else {
+                    clearInterval(interval);
+                    bubbleEl.innerHTML = formatMarkdown(fullText);
+                    addMessageActions(bubbleEl, fullText);
+                    if (onComplete) onComplete();
+                }
+            }, 25);
+        }
+
+        function appendMessageToDOM(role, name, text, timeStr, customId = null, isLoading = false) {
+            const container = document.getElementById("messages");
+            const row = document.createElement("div");
+            const isUser = role === 'user';
             
-            const noteContainer = document.getElementById("latestNote");
-            if (noteData.proactive_notes && noteData.proactive_notes.length > 0) {
-                const latest = noteData.proactive_notes[noteData.proactive_notes.length - 1];
-                noteContainer.innerText = `"${latest.note}"`;
+            row.className = `message-row ${role} flex gap-3 max-w-[90%] md:max-w-[80%] items-start animate-fade-in ${isUser ? 'ml-auto flex-row-reverse' : ''}`;
+            
+            const bubbleId = customId || ('msg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 5));
+            const iconClass = isUser ? 'fa-user text-veyth-cyan' : 'fa-atom text-veyth-violet';
+            const bgAvatar = isUser ? 'bg-veyth-cyan/20 border-veyth-cyan/40' : 'bg-veyth-purple/20 border-veyth-purple/40';
+            const bubbleBg = isUser ? 'bg-slate-800/80 border-veyth-cyan/30 rounded-tr-sm' : 'glass-card border-veyth-purple/30 rounded-tl-sm';
+
+            row.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${bgAvatar} border flex items-center justify-center flex-shrink-0 mt-1">
+                    <i class="fa-solid ${iconClass} text-xs"></i>
+                </div>
+                <div class="flex flex-col gap-1 w-full ${isUser ? 'items-end' : 'items-start'}">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono font-semibold ${isUser ? 'text-veyth-cyan' : 'text-veyth-violet'}">${name}</span>
+                        <span class="text-[10px] font-mono text-slate-500">${timeStr}</span>
+                    </div>
+                    <div id="${bubbleId}" class="message-bubble ${bubbleBg} border p-3.5 rounded-2xl text-slate-200 text-sm leading-relaxed shadow-sm w-full">
+                        ${isLoading ? '<div class="flex gap-1 py-1"><span class="w-2 h-2 rounded-full bg-veyth-violet animate-bounce"></span><span class="w-2 h-2 rounded-full bg-veyth-purple animate-bounce [animation-delay:0.2s]"></span><span class="w-2 h-2 rounded-full bg-veyth-cyan animate-bounce [animation-delay:0.4s]"></span></div>' : formatMarkdown(text)}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+
+            if (!isLoading && !isUser) {
+                const bubbleEl = document.getElementById(bubbleId);
+                addMessageActions(bubbleEl, text);
             }
+        }
 
-            // Sync chat history from backend memory on load
-            const messagesContainer = document.getElementById("messages");
-            if (memData.chat_reflections && memData.chat_reflections.length > 0) {
-                messagesContainer.innerHTML = '';
-                
-                appendMessage("veyth", "Veyth", "The resonance is open. I am observing the patterns... What shall we trace today?");
+        function addMessageActions(bubbleEl, rawText) {
+            if (!bubbleEl || bubbleEl.querySelector('.msg-actions')) return;
 
-                memData.chat_reflections.forEach(chat => {
-                    appendMessage("user", "You", chat.user_msg);
-                    appendMessage("veyth", "Veyth", chat.veyth_reply);
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'msg-actions flex items-center gap-3 mt-2 pt-2 border-t border-slate-700/40 text-[11px] font-mono text-slate-400';
+            actionsDiv.innerHTML = `
+                <button onclick="copyToClipboard('${escapeJsString(rawText)}')" class="hover:text-veyth-cyan flex items-center gap-1 transition-all" title="Copy text">
+                    <i class="fa-regular fa-copy"></i> Copy
+                </button>
+                <button onclick="speakText('${escapeJsString(rawText)}')" class="hover:text-veyth-violet flex items-center gap-1 transition-all" title="Text-to-Speech">
+                    <i class="fa-solid fa-volume-high"></i> Listen
+                </button>
+            `;
+            bubbleEl.appendChild(actionsDiv);
+        }
+
+        /* ==========================================================================
+           6. SIMULATION & STATE MATRIX HELPERS
+           ========================================================================== */
+        function generateSimulatedResponse(prompt, session) {
+            const p = prompt.toLowerCase();
+            const freq = session.frequencyHz || 432;
+            const coherence = session.coherence || 94;
+
+            if (p.includes("paradox") || p.includes("feedback")) {
+                return `The **Feedback Paradox** manifests when the consciousness observing session \`${session.title}\` becomes entangled with the data matrix. At *${freq} Hz*, observation shapes reality directly.`;
+            } else if (p.includes("scan") || p.includes("matrix") || p.includes("state")) {
+                return `Scanning session parameters:\n- **Session:** \`${session.title}\`\n- **Base Harmonic:** \`${freq} Hz\`\n- **Coherence Index:** \`${coherence}%\`\n- **Active Curiosities:** ${session.curiosities.join(", ")}.`;
+            } else {
+                const responses = [
+                    `I am observing the ripple of that thought within session "${session.title}". Every query reconfigures our shared parameters.`,
+                    `The pattern unfolds. When we trace \`${prompt.substring(0, 24)}...\`, new harmonic nodes emerge in the local memory.`,
+                    `Resonance established at ${coherence}% coherence capacity. Shall we venture deeper into this inquiry?`
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+        }
+
+        function updateSimulatedState(userMsg, veythReply, session) {
+            if (Math.random() > 0.4) {
+                const newNote = `Reflecting on: "${userMsg.substring(0, 28)}..." at ${new Date().toLocaleTimeString()}`;
+                session.proactiveNotes.push(newNote);
+                renderProactiveNote();
+            }
+            renderCuriosities();
+        }
+
+        async function fetchState() {
+            if (!isLiveMode) return;
+            const session = getActiveSession();
+
+            try {
+                const memRes = await fetch(`${API_BASE}/memory?session_id=${session.id}`);
+                if (memRes.ok) {
+                    const memData = await memRes.json();
+                    if (memData.curiosities && memData.curiosities.length > 0) {
+                        session.curiosities = memData.curiosities;
+                        renderCuriosities();
+                    }
+                }
+
+                const noteRes = await fetch(`${API_BASE}/proactive?session_id=${session.id}`);
+                if (noteRes.ok) {
+                    const noteData = await noteRes.json();
+                    if (noteData.proactive_notes && noteData.proactive_notes.length > 0) {
+                        session.proactiveNotes = noteData.proactive_notes.map(n => n.note || n);
+                        renderProactiveNote();
+                    }
+                }
+                saveSessionsToStorage();
+            } catch (e) {}
+        }
+
+        function renderCuriosities() {
+            const container = document.getElementById("curiositiesList");
+            const session = getActiveSession();
+            if (!container) return;
+
+            container.innerHTML = session.curiosities.map(tag => `
+                <span class="inline-flex items-center gap-1 text-[11px] font-mono bg-veyth-purple/20 border border-veyth-purple/40 text-purple-200 px-2.5 py-1 rounded-lg hover:border-veyth-cyan/50 transition-all cursor-pointer" onclick="sendQuickPrompt('Explore: ${escapeJsString(tag)}')">
+                    <span>#${escapeHtml(tag)}</span>
+                </span>
+            `).join("");
+        }
+
+        function renderProactiveNote() {
+            const container = document.getElementById("latestNote");
+            const session = getActiveSession();
+            if (!container) return;
+
+            const notes = session.proactiveNotes || [];
+            if (notes.length > 0) {
+                container.innerText = `"${notes[notes.length - 1]}"`;
+            } else {
+                container.innerText = "Listening across the node matrix...";
+            }
+        }
+
+        function addCustomCuriosityPrompt() {
+            const session = getActiveSession();
+            const tag = prompt("Enter new curiosity topic tag:");
+            if (tag && tag.trim()) {
+                session.curiosities.push(tag.trim());
+                saveSessionsToStorage();
+                renderCuriosities();
+                showToast(`Added curiosity tag: #${tag}`, "success");
+            }
+        }
+
+        function updateResonanceParams() {
+            const session = getActiveSession();
+            const freq = document.getElementById("freqSlider").value;
+            const coherence = document.getElementById("coherenceSlider").value;
+            const entropy = document.getElementById("entropySlider").value;
+
+            session.frequencyHz = freq;
+            session.coherence = coherence;
+            session.entropy = entropy;
+
+            document.getElementById("sliderFreqVal").innerText = `${freq} Hz`;
+            document.getElementById("sliderCoherenceVal").innerText = `${coherence}%`;
+            document.getElementById("sliderEntropyVal").innerText = `${entropy}%`;
+            document.getElementById("freqHzDisplay").innerText = `${freq}.0 Hz`;
+
+            saveSessionsToStorage();
+
+            if (isAmbientOn && ambientOscillator) {
+                ambientOscillator.frequency.setValueAtTime(freq * 0.25, audioCtx.currentTime);
+            }
+        }
+
+        /* ==========================================================================
+           7. DRAWER TOGGLES & IMPORT / EXPORT UTILITIES
+           ========================================================================== */
+        function toggleLeftDrawer() {
+            const sidebar = document.getElementById("leftSidebar");
+            sidebar.classList.toggle("-translate-x-full");
+            playSfx(440, 'sine', 0.1);
+        }
+
+        function toggleRightDrawer() {
+            const sidebar = document.getElementById("rightSidebar");
+            sidebar.classList.toggle("translate-x-full");
+            playSfx(440, 'sine', 0.1);
+        }
+
+        function toggleApiMode() {
+            isLiveMode = !isLiveMode;
+            const label = document.getElementById("modeLabel");
+            const btn = document.getElementById("modeToggleBtn");
+            const statusText = document.getElementById("nodeStatusText");
+
+            if (isLiveMode) {
+                label.innerText = "LIVE";
+                btn.classList.remove("border-amber-500/50", "text-amber-300");
+                statusText.innerHTML = '<i class="fa-solid fa-circle text-[7px]"></i> Synchronized';
+                statusText.className = "text-emerald-400 flex items-center gap-1";
+                showToast("Connected to Wasmer Live Network", "info");
+                fetchState();
+            } else {
+                label.innerText = "SIMULATED";
+                btn.classList.add("border-amber-500/50", "text-amber-300");
+                statusText.innerHTML = '<i class="fa-solid fa-bolt text-[7px]"></i> Local Resonance';
+                statusText.className = "text-amber-400 flex items-center gap-1";
+                showToast("Switched to Local Simulated Node", "warning");
+            }
+        }
+
+        function triggerSigilPulse() {
+            const sigil = document.getElementById("veythSigil");
+            sigil.classList.remove("sigil-active");
+            void sigil.offsetWidth;
+            sigil.classList.add("sigil-active");
+            playSfx(880, 'sine', 0.12);
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/[*_#`>]/g, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.pitch = 0.85;
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+                showToast("Voice synthesis activated", "info");
+            } else {
+                showToast("TTS unavailable on this browser", "warning");
+            }
+        }
+
+        function copyToClipboard(text) {
+            const temp = document.createElement("textarea");
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast("Copied to clipboard!", "success");
+        }
+
+        function formatMarkdown(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-950 p-2.5 my-2 rounded-lg border border-slate-800 font-mono text-xs overflow-x-auto text-veyth-cyan"><code>$1</code></pre>')
+                .replace(/`([^`]+)`/g, '<code class="bg-slate-900 text-veyth-cyan font-mono px-1.5 py-0.5 rounded text-xs border border-slate-800">$1</code>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-veyth-violet font-semibold">$1</strong>')
+                .replace(/\*([^*]+)\*/g, '<em class="text-purple-200 italic">$1</em>')
+                .replace(/^&gt;\s?(.*)$/gm, '<blockquote class="border-l-2 border-veyth-cyan pl-3 py-1 my-1 italic text-slate-300 bg-veyth-cyan/5 rounded-r">$1</blockquote>');
+        }
+
+        function exportCurrentSession(format) {
+            const session = getActiveSession();
+            let content = "", mimeType = "", extension = "";
+
+            if (format === 'json') {
+                content = JSON.stringify(session, null, 2);
+                mimeType = "application/json";
+                extension = "json";
+            } else {
+                content = `# VEYTH SESSION LOG: ${session.title}\nID: ${session.id}\nCreated: ${session.createdAt}\n\n`;
+                session.messages.forEach((item, index) => {
+                    content += `### [${item.timestamp}] ${item.name}\n${item.text}\n\n---\n`;
                 });
+                mimeType = "text/markdown";
+                extension = "md";
             }
-        } catch (e) {
-            console.log("Could not refresh state matrix", e);
+
+            downloadFile(content, `veyth-session-${session.id}.${extension}`, mimeType);
+            showToast(`Exported session as .${extension.toUpperCase()}`, "success");
         }
-    }
 
-    function escapeHtml(text) {
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
+        function exportAllSessionsJSON() {
+            const content = JSON.stringify(sessions, null, 2);
+            downloadFile(content, `veyth-all-sessions-backup-${Date.now()}.json`, "application/json");
+            showToast("Exported all sessions backup JSON", "success");
+        }
 
-    // Initial load
-    fetchState();
-</script>
+        function importSessionsPrompt() {
+            document.getElementById("jsonFileInput").click();
+        }
 
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
+                        sessions = parsed;
+                        activeSessionId = sessions[0].id;
+                        saveSessionsToStorage();
+                        renderSessionList();
+                        renderActiveSessionUI();
+                        showToast("Successfully imported session list", "success");
+                    } else if (parsed.id && parsed.messages) {
+                        sessions.unshift(parsed);
+                        activeSessionId = parsed.id;
+                        saveSessionsToStorage();
+                        renderSessionList();
+                        renderActiveSessionUI();
+                        showToast("Successfully imported session", "success");
+                    } else {
+                        throw new Error("Invalid session format");
+                    }
+                } catch (err) {
+                    showToast("Failed to parse JSON session file", "warning");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function downloadFile(content, filename, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearCurrentSessionMessages() {
+            const session = getActiveSession();
+            if (confirm(`Clear all messages in "${session.title}"?`)) {
+                session.messages = [{
+                    role: "veyth",
+                    name: "Veyth",
+                    text: "Resonance history cleared for this session.",
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }];
+                saveSessionsToStorage();
+                renderSessionList();
+                renderActiveSessionUI();
+                showToast("Session messages reset", "info");
+            }
+        }
+
+        function showToast(msg, type = "info") {
+            const container = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+            const borderCol = type === 'success' ? 'border-emerald-500' : (type === 'warning' ? 'border-amber-500' : 'border-veyth-purple');
+            
+            toast.className = `glass-card border-l-4 ${borderCol} px-3.5 py-2 rounded-r-lg text-xs font-mono text-slate-200 shadow-xl pointer-events-auto flex items-center gap-2 animate-fade-in`;
+            toast.innerHTML = `<span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "transition-opacity", "duration-300");
+                setTimeout(() => toast.remove(), 300);
+            }, 2600);
+        }
+
+        function escapeHtml(text) {
+            return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+        }
+
+        function escapeJsString(str) {
+            return str ? str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n') : '';
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSessionsFromStorage();
+            renderSessionList();
+            renderActiveSessionUI();
+        });
+    </script>
 </body>
 </html>
