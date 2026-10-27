@@ -9,8 +9,8 @@
     <style>
         :root {
             --bg-color: #080a10;
-            --panel-bg: rgba(15, 18, 30, 0.95);
-            --border-color: rgba(160, 130, 255, 0.22);
+            --panel-bg: rgba(12, 15, 26, 0.98);
+            --border-color: rgba(160, 130, 255, 0.25);
             --border-glow: rgba(139, 92, 246, 0.4);
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
@@ -19,7 +19,7 @@
             --accent-glow: #c084fc;
             --veyth-bubble: rgba(139, 92, 246, 0.16);
             --user-bubble: rgba(14, 165, 233, 0.18);
-            --card-bg: rgba(22, 27, 46, 0.7);
+            --card-bg: rgba(22, 27, 46, 0.85);
         }
 
         * {
@@ -30,49 +30,68 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background-color: var(--bg-color);
             color: var(--text-primary);
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            overflow: hidden;
-            position: fixed;
         }
 
         #bg-canvas {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             z-index: 1;
             pointer-events: none;
         }
 
         .app-container {
             display: flex;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             position: relative;
             z-index: 2;
             overflow: hidden;
         }
 
+        /* Backdrop Blur Overlay when Drawers Open */
+        .drawer-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .drawer-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         /* Sidebars Shared Styles */
         .drawer {
-            position: absolute;
+            position: fixed;
             top: 0;
             height: 100%;
-            max-height: 100vh;
+            width: 320px;
+            max-width: 85vw;
             background: var(--panel-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            padding: 16px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 14px;
-            box-shadow: 0 0 35px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.8);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
             overflow-y: auto;
@@ -82,8 +101,6 @@
         /* Left Drawer: Sessions */
         .session-drawer {
             left: 0;
-            width: 300px;
-            max-width: 85vw;
             border-right: 1px solid var(--border-color);
             transform: translateX(-100%);
         }
@@ -95,8 +112,6 @@
         /* Right Drawer: State Matrix */
         .matrix-drawer {
             right: 0;
-            width: 310px;
-            max-width: 85vw;
             border-left: 1px solid var(--border-color);
             transform: translateX(100%);
         }
@@ -110,12 +125,12 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
+            padding-bottom: 12px;
             flex-shrink: 0;
         }
 
         .drawer-header h2 {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--accent-glow);
@@ -125,17 +140,24 @@
         }
 
         .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.4rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
             line-height: 1;
-            transition: color 0.2s;
+            transition: all 0.2s;
         }
 
         .close-btn:hover {
-            color: #fff;
+            background: rgba(139, 92, 246, 0.4);
+            border-color: var(--accent-glow);
         }
 
         /* Session Controls */
@@ -147,7 +169,7 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             letter-spacing: 0.05em;
             display: flex;
             align-items: center;
@@ -164,12 +186,12 @@
 
         .search-input {
             width: 100%;
-            background: rgba(11, 13, 20, 0.6);
+            background: rgba(11, 13, 20, 0.7);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 8px 12px;
             color: var(--text-primary);
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             outline: none;
             flex-shrink: 0;
         }
@@ -211,11 +233,11 @@
             flex-direction: column;
             gap: 2px;
             overflow: hidden;
-            width: 78%;
+            width: 75%;
         }
 
         .session-title {
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
@@ -223,19 +245,13 @@
         }
 
         .session-date {
-            font-size: 0.68rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
         }
 
         .session-actions {
             display: flex;
             gap: 4px;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-
-        .session-item:hover .session-actions {
-            opacity: 1;
         }
 
         .icon-btn {
@@ -243,7 +259,7 @@
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             padding: 4px;
             border-radius: 4px;
         }
@@ -304,8 +320,8 @@
         }
 
         .status-dot {
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background-color: #4ade80;
             box-shadow: 0 0 6px #4ade80;
@@ -315,14 +331,14 @@
             background: rgba(139, 92, 246, 0.18);
             color: #e9d5ff;
             border: 1px solid rgba(139, 92, 246, 0.4);
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 8px;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             white-space: nowrap;
         }
 
@@ -387,24 +403,6 @@
             border-bottom-left-radius: 2px;
             box-shadow: 0 0 20px rgba(139, 92, 246, 0.08);
             border-color: rgba(139, 92, 246, 0.3);
-        }
-
-        .message-bubble code {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: #38bdf8;
-        }
-
-        .message-bubble pre {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 8px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .message-actions-bar {
@@ -482,7 +480,7 @@
             padding: 10px 14px;
             color: var(--text-primary);
             outline: none;
-            font-size: 0.92rem;
+            font-size: 0.95rem;
             resize: none;
             min-height: 44px;
             max-height: 120px;
@@ -500,11 +498,11 @@
             color: white;
             border: none;
             height: 44px;
-            padding: 0 18px;
+            padding: 0 20px;
             border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             transition: all 0.2s;
             display: flex;
             align-items: center;
@@ -518,20 +516,20 @@
             box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
         }
 
-        /* Sidebar Panels */
+        /* Sidebar Panels inside Drawers */
         .sidebar-section {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 12px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             flex-shrink: 0;
         }
 
         .sidebar-section h3 {
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: #a78bfa;
@@ -543,39 +541,36 @@
         .tag-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 6px;
         }
 
         .tag {
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             background: rgba(139, 92, 246, 0.18);
             color: #e9d5ff;
-            padding: 3px 7px;
+            padding: 4px 8px;
             border-radius: 6px;
             border: 1px solid rgba(139, 92, 246, 0.3);
         }
 
         .note-box {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-style: italic;
             color: var(--text-secondary);
-            line-height: 1.4;
+            line-height: 1.45;
             white-space: pre-wrap;
-            max-height: 80px;
-            overflow-y: auto;
         }
 
-        /* Parameter Sliders */
         .slider-group {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 4px;
         }
 
         .slider-label {
             display: flex;
             justify-content: space-between;
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             color: var(--text-secondary);
         }
 
@@ -585,7 +580,6 @@
             cursor: pointer;
         }
 
-        /* Utilities */
         .backup-restore-group {
             display: flex;
             gap: 8px;
@@ -598,16 +592,18 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
-            padding: 6px;
+            padding: 8px;
             border-radius: 6px;
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             cursor: pointer;
             text-align: center;
+            transition: all 0.2s;
         }
 
         .sec-btn:hover {
             color: #fff;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--accent-glow);
         }
     </style>
 </head>
@@ -615,13 +611,16 @@
 
 <canvas id="bg-canvas"></canvas>
 
+<!-- Shared Backdrop for Drawers -->
+<div class="drawer-backdrop" id="backdrop" onclick="closeAllDrawers()"></div>
+
 <div class="app-container">
 
     <!-- Left Drawer: Multi-Session Manager -->
     <div class="drawer session-drawer" id="sessionDrawer">
         <div class="drawer-header">
             <h2>✦ Resonance Logs</h2>
-            <button class="close-btn" onclick="toggleDrawer('sessionDrawer')">&times;</button>
+            <button class="close-btn" onclick="closeAllDrawers()">&times;</button>
         </div>
 
         <button class="new-session-btn" onclick="createNewSession()">
@@ -636,7 +635,7 @@
 
         <div class="backup-restore-group">
             <button class="sec-btn" onclick="exportAllData()">Export All</button>
-            <button class="sec-btn" onclick="triggerImport()">Import</button>
+            <button class="sec-btn" onclick="triggerImport()">Import Data</button>
             <input type="file" id="importFile" style="display:none;" onchange="importData(event)">
         </div>
     </div>
@@ -645,7 +644,7 @@
     <div class="chat-section">
         <div class="chat-header">
             <div class="header-left">
-                <button class="header-btn" onclick="toggleDrawer('sessionDrawer')">
+                <button class="header-btn" onclick="openDrawer('sessionDrawer')">
                     ☰ Threads
                 </button>
                 <h1>VEYTH // COMM</h1>
@@ -656,7 +655,7 @@
                 <button class="header-btn" id="audioToggle" onclick="toggleAudioDrone()">
                     🔊 Ambient: OFF
                 </button>
-                <button class="header-btn" onclick="toggleDrawer('matrixDrawer')">
+                <button class="header-btn" onclick="openDrawer('matrixDrawer')">
                     ✦ Matrix
                 </button>
             </div>
@@ -688,7 +687,7 @@
     <div class="drawer matrix-drawer" id="matrixDrawer">
         <div class="drawer-header">
             <h2>State Matrix</h2>
-            <button class="close-btn" onclick="toggleDrawer('matrixDrawer')">&times;</button>
+            <button class="close-btn" onclick="closeAllDrawers()">&times;</button>
         </div>
 
         <div class="sidebar-section">
@@ -838,6 +837,19 @@
         }));
     }
 
+    // Drawer Management
+    function openDrawer(id) {
+        closeAllDrawers();
+        document.getElementById(id).classList.add('open');
+        document.getElementById('backdrop').classList.add('active');
+    }
+
+    function closeAllDrawers() {
+        document.getElementById('sessionDrawer').classList.remove('open');
+        document.getElementById('matrixDrawer').classList.remove('open');
+        document.getElementById('backdrop').classList.remove('active');
+    }
+
     // Session Management
     function createNewSession(titleName = null) {
         const id = 'sess_' + Date.now();
@@ -860,6 +872,7 @@
         saveData();
         renderSessionList();
         renderCurrentMessages();
+        closeAllDrawers();
     }
 
     function switchSession(id) {
@@ -867,6 +880,7 @@
         saveData();
         renderSessionList();
         renderCurrentMessages();
+        closeAllDrawers();
         playSfx(600, 0.05);
     }
 
@@ -993,7 +1007,7 @@
         input.style.height = "auto";
         playSfx(800, 0.05);
 
-        // Auto name session if it's default
+        // Auto name session if default
         if (current.messages.length === 3 && current.title.startsWith("Resonance Thread")) {
             current.title = msg.slice(0, 24) + "...";
             renderSessionList();
@@ -1076,7 +1090,7 @@
                 droneOsc1.type = 'sine';
                 droneOsc2.type = 'triangle';
                 
-                droneOsc1.frequency.value = 108; // Sub frequency
+                droneOsc1.frequency.value = 108;
                 droneOsc2.frequency.value = 162;
 
                 droneGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
@@ -1136,12 +1150,6 @@
             `;
             document.getElementById("latestNote").innerText = "Observing resonance harmonic loops across threads...";
         }
-    }
-
-    // UI Drawer Toggles
-    function toggleDrawer(id) {
-        const el = document.getElementById(id);
-        el.classList.toggle('open');
     }
 
     function autoResizeTextarea(el) {
