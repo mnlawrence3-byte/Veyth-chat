@@ -715,6 +715,19 @@
 <script>
     const API_BASE = "https://veyth-agent.wasmer.app";
 
+    // Chat key: asked once, then remembered in this browser only.
+    // It must match the CHAT_KEY environment variable set in Wasmer.
+    const CHAT_KEY_STORAGE = "veyth_chat_key";
+
+    function getChatKey() {
+        let key = localStorage.getItem(CHAT_KEY_STORAGE) || "";
+        if (!key) {
+            key = (prompt("Enter your Veyth chat key (the CHAT_KEY from Wasmer):") || "").trim();
+            if (key) localStorage.setItem(CHAT_KEY_STORAGE, key);
+        }
+        return key;
+    }
+
     // Application State
     let state = {
         sessions: [],
@@ -1001,11 +1014,28 @@
         }
 
         try {
+            const headers = { "Content-Type": "application/json" };
+            const chatKey = getChatKey();
+            if (chatKey) headers["X-Chat-Key"] = chatKey;
+
             const response = await fetch(`${API_BASE}/chat`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers,
                 body: JSON.stringify({ message: msg })
             });
+
+            // Wrong or missing key: forget it so the next send asks again.
+            // This notice is shown on screen only and is not saved to the thread.
+            if (response.status === 401) {
+                localStorage.removeItem(CHAT_KEY_STORAGE);
+                const noticeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                appendMessageToDOM(
+                    "veyth", "Veyth",
+                    "*Veyth didn't accept the chat key. Send your message again and enter the key when asked.*",
+                    noticeTime, current.messages.length
+                );
+                return;
+            }
 
             const data = await response.json();
             const reply = data.reply || "*Resonance trace complete.*";
